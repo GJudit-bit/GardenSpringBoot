@@ -1,0 +1,63 @@
+package com.example.garden.service;
+
+
+import com.example.garden.model.Item;
+import com.example.garden.model.UnitOfQuantity;
+import com.example.garden.repository.ItemRepository;
+import com.example.garden.repository.UnitOfQuantityRepository;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class UnitOfQuantityService {
+
+    private final UnitOfQuantityRepository unitOfQuantityRepository;
+    private final ItemRepository itemRepository;
+
+    @Autowired
+    public UnitOfQuantityService(UnitOfQuantityRepository unitOfQuantityRepository, ItemRepository itemRepository) {
+        this.unitOfQuantityRepository = unitOfQuantityRepository;
+        this.itemRepository = itemRepository;
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public UnitOfQuantity createUnitOfQuantity(UnitOfQuantity unitOfQuantity) {
+        return unitOfQuantityRepository.save(unitOfQuantity);
+    }
+
+    public UnitOfQuantity updateUnitOfQuantity(UnitOfQuantity unitOfQuantity) {
+        return unitOfQuantityRepository.save(unitOfQuantity);
+    }
+
+
+    public void deleteUnitOfQuantity(Integer id) {
+        UnitOfQuantity unitOfQuantity = unitOfQuantityRepository.findById(id).orElse(null);
+
+        if (unitOfQuantity != null) {
+            List<Item> items = itemRepository.findByUnitOfQuantity_Id(unitOfQuantity.getId());
+
+            if (items.isEmpty()) {
+                unitOfQuantityRepository.deleteById(id);
+            } else {
+                throw new IllegalStateException("Cannot delete UnitOfQuantity with id " + id + " because it is associated with items.");
+            }
+        } else {
+            throw new EntityNotFoundException("UnitOfQuantity with id " + id + " does not exist.");
+        }
+
+    }
+
+    public UnitOfQuantity findById(Integer id) {
+        return unitOfQuantityRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("UnitOfQuantity with id " + id + " does not exist."));
+    }
+
+    public List<UnitOfQuantity> findAll() {
+        return unitOfQuantityRepository.findAll();
+    }
+
+
+}
