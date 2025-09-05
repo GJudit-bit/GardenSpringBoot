@@ -33,16 +33,14 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/garden").authenticated()
                         .requestMatchers("/garden/register").permitAll()
-                        .requestMatchers("/api/hello").authenticated()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/garden/login").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(login -> login
-                        .loginProcessingUrl("/api/login") // saját endpoint
-
+                        .loginProcessingUrl("/garden/login")
                         .successHandler(successHandler())
                         .failureHandler(failureHandler()))
                 .build();
