@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @RestController
 @EnableWebMvc
 @RequestMapping("/garden")
-public class CurrencyController {
+public class    CurrencyController {
 
     private final CurrencyService currencyService;
 
