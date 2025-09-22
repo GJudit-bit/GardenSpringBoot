@@ -17,7 +17,7 @@ public class Currency implements Serializable {
 
     @Size(min = 2, max = 3)
     @Column(unique=true, nullable=false)
-    private String code;
+    private String name;
 
     @OneToMany(mappedBy = "currency", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JsonBackReference
@@ -27,15 +27,15 @@ public class Currency implements Serializable {
     }
 
     public Currency(String code) {
-          this.code = code;
+          this.name = code;
     }
 
-    public @Size(min = 2, max = 3) String getCode() {
-        return code;
+    public @Size(min = 2, max = 3) String getName() {
+        return name;
     }
 
-    public void setCode(@Size(min = 2, max = 3) String code) {
-        this.code = code;
+    public void setName(@Size(min = 2, max = 3) String name) {
+        this.name = name;
     }
 
     public List<Registration> getRegistration() {

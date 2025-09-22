@@ -1,4 +1,4 @@
-package com.example.garden.repository;
+package com.example.garden.security.repository;
 
 import com.example.garden.security.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;

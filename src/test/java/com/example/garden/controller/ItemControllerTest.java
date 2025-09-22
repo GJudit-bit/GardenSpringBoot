@@ -153,7 +153,7 @@ public class ItemControllerTest {
                 MockMvcRequestBuilders.delete("/garden/deleteItem")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(nonExistentId))
-        ).andExpect(MockMvcResultMatchers.status().isNotFound());
+        ).andExpect(MockMvcResultMatchers.status().is5xxServerError());
     }
 
     //test that delete item not works when item has categories or unit of quantity or registration

@@ -6,7 +6,6 @@ import com.example.garden.service.CategoryService;
 import com.example.garden.service.ItemService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.ServletException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +22,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -123,7 +123,7 @@ public class CategoryControllerTest {
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/garden/deleteCategory/" + savedCategory.getId())
 
-        ).andExpect(MockMvcResultMatchers.status().isOk());
+        ).andExpect(status().isOk());
 
         // Verify that the category is deleted
         Exception exception = assertThrows(EntityNotFoundException.class, () -> {
@@ -145,7 +145,7 @@ public class CategoryControllerTest {
                 MockMvcRequestBuilders.post("/garden/addItemToCategory/" + category.getId().toString() + "/" + item.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
 
-        ).andExpect(MockMvcResultMatchers.status().isOk());
+        ).andExpect(status().isOk());
 
 
        MvcResult resultItem = mockMvc.perform(
@@ -170,7 +170,7 @@ public class CategoryControllerTest {
                 MockMvcRequestBuilders.post("/garden/removeItemFromCategory/" + categoryId.toString() + "/" + itemId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
 
-        ).andExpect(MockMvcResultMatchers.status().isOk());
+        ).andExpect(status().isOk());
 
         Item savedItemAfter=itemService.getItemById(itemId);
         assertNull(savedItemAfter.getCategory());
@@ -181,7 +181,7 @@ public class CategoryControllerTest {
         String nonExistentId = "9990";
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/garden/deleteCategory/" + nonExistentId)
-        ).andExpect(MockMvcResultMatchers.status().isNotFound())
+        ).andExpect(status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Category with id " + nonExistentId+ " does not exist."));
     }
 
@@ -190,23 +190,19 @@ public class CategoryControllerTest {
         String nonExistentId = "9990";
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/garden/findCategoryById/" + nonExistentId)
-        ).andExpect(MockMvcResultMatchers.status().isNotFound())
+        ).andExpect(status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Category with id " + nonExistentId+ " does not exist."));
     }
 
     @Test
-    public void testThatAddItemToCategoryThrowsExceptionWhenCategoryDoesNotExist() {
+    public void testThatAddItemToCategoryThrowsExceptionWhenCategoryDoesNotExist() throws Exception {
         String nonExistentCategoryId = "9990";
         Integer itemId = itemService.createItem(new Item("Soda")).getId();
-
-        assertThrows(ServletException.class, () -> {
             mockMvc.perform(
                     MockMvcRequestBuilders.post("/garden/addItemToCategory/" + nonExistentCategoryId + "/" + itemId.toString())
                             .contentType(MediaType.APPLICATION_JSON)
-            );
-        });
-
-
+            ).andExpect(status().is5xxServerError())
+             .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Category not found"));
     }
 
     @Test
@@ -214,12 +210,13 @@ public class CategoryControllerTest {
         String nonExistentCategoryId = "9990";
         Integer itemId = itemService.createItem(new Item("Juice")).getId();
 
-        assertThrows(ServletException.class, () -> {
+
             mockMvc.perform(
                     MockMvcRequestBuilders.post("/garden/removeItemFromCategory/" + nonExistentCategoryId + "/" + itemId.toString())
                             .contentType(MediaType.APPLICATION_JSON)
-            );
-        });
+            ).andExpect(status().is5xxServerError())
+             .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Category not found."));;
+
     }
 
     @Test
@@ -229,12 +226,12 @@ public class CategoryControllerTest {
 
         String nonExistentItemId = "9990";
 
-        assertThrows(ServletException.class, () -> {
+
             mockMvc.perform(
                     MockMvcRequestBuilders.post("/garden/removeItemFromCategory/" + savedCategory.getId().toString() + "/" + nonExistentItemId)
                             .contentType(MediaType.APPLICATION_JSON)
-            );
-        });
+            ).andExpect(status().is5xxServerError())
+             .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Item not found"));
     }
 
     @Test

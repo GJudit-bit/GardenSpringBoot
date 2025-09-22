@@ -65,7 +65,7 @@ public class CategoryService {
     }
 
     public void removeItemFromCategory(Integer categoryId, Integer itemId) {
-        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found"));
+        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found."));
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("Item not found"));
         if(item.getCategory().equals(category)) {
             item.setCategory(null); // Remove the category from the item

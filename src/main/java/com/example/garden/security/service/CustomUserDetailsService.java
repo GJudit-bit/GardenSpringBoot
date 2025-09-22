@@ -1,9 +1,9 @@
 package com.example.garden.security.service;
 
-import com.example.garden.repository.RoleRepository;
+import com.example.garden.security.repository.RoleRepository;
 import com.example.garden.security.model.Role;
 import com.example.garden.security.model.User;
-import com.example.garden.repository.UserRepository;
+import com.example.garden.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

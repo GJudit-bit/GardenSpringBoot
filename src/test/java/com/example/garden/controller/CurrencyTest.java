@@ -37,7 +37,7 @@ public class CurrencyTest {
                 MockMvcRequestBuilders.post("/garden/addCurrency")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(currency))
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.code").value("USD"))
+        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("USD"))
           .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -45,12 +45,12 @@ public class CurrencyTest {
     public void updateCurrency() throws Exception {
         Currency currency = new Currency("EUR");
         Currency savedCurrency=currencyService.createCurrency(currency);
-        savedCurrency.setCode("HUF");
+        savedCurrency.setName("HUF");
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/garden/updateCurrency")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(savedCurrency))
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.code").value("HUF"))
+        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("HUF"))
           .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -78,7 +78,7 @@ public class CurrencyTest {
         Currency savedCurrency = currencyService.createCurrency(currency);
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/garden/findCurrencyById/" + savedCurrency.getId())
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.code").value("JPY"))
+        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("JPY"))
           .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -92,8 +92,8 @@ public class CurrencyTest {
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/garden/findAllCurrencies")
-        ).andExpect(MockMvcResultMatchers.jsonPath("$[0].code").value("HUF"))
-          .andExpect(MockMvcResultMatchers.jsonPath("$[1].code").value("JPY"))
+        ).andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("HUF"))
+          .andExpect(MockMvcResultMatchers.jsonPath("$[1].name").value("JPY"))
           .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }
