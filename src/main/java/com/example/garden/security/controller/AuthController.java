@@ -46,8 +46,8 @@ public class AuthController     {
             User user = userDetailsService.getByUserName(userDetails.getUsername());
             // Token generálás
             String token = jwtUtil.generateToken(userDetails, user);
-
             return ResponseEntity.ok(new AuthResponse(token));
+
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
