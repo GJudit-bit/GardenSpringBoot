@@ -1,7 +1,10 @@
 package com.example.garden.service;
 
+import com.example.garden.dto.CategoryDto;
+import com.example.garden.mapper.CategoryMapper;
 import com.example.garden.model.Category;
 import com.example.garden.model.Item;
+import com.example.garden.model.UnitOfQuantity;
 import com.example.garden.repository.CategoryRepository;
 import com.example.garden.repository.ItemRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,26 +20,34 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final ItemRepository itemRepository;
+    private final CategoryMapper categoryMapper;
 
     @Autowired
-    public CategoryService(CategoryRepository categoryRepository, ItemRepository itemRepository) {
+    public CategoryService(CategoryRepository categoryRepository, ItemRepository itemRepository, CategoryMapper categoryMapper) {
         this.categoryRepository = categoryRepository;
         this.itemRepository = itemRepository;
+        this.categoryMapper = categoryMapper;
     }
 
-    public Category createCategory(Category category) {
-        return categoryRepository.save(category);
+    public CategoryDto createCategory(CategoryDto categoryDTO) {
+        Category category = categoryMapper.toEntity(categoryDTO);
+        return categoryMapper.toCategoryDto(categoryRepository.save(category));
     }
-    public Category getCategoryById(Integer id) {
-
-        return categoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Category with id " + id + " does not exist."));
-    }
-    public List<Category> getAllCategories(Sort sort) {
-        return categoryRepository.findAll(sort);
+    public CategoryDto findById(Integer id) {
+        Category category= categoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Category with id " + id + " does not exist."));
+        return categoryMapper.toCategoryDto(category);
     }
 
-    public Category updateCategory(Category category) {
-        return categoryRepository.save(category);
+    public List<CategoryDto> getAllCategories(Sort sort) {
+        return categoryRepository.findAll(sort).stream()
+                .map(categoryMapper::toCategoryDto)
+                .toList();
+    }
+
+    public CategoryDto updateCategory(CategoryDto categoryDto) {
+        Category category=categoryMapper.toEntity(categoryDto);
+        Category sacedCategory= categoryRepository.save(category);
+        return categoryMapper.toCategoryDto(sacedCategory);
     }
     public void deleteCategory(Integer id) {
         Category category = categoryRepository.findById(id).orElse(null);

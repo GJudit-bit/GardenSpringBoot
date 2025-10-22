@@ -1,6 +1,6 @@
 package com.example.garden.controller;
 
-import com.example.garden.model.Registration;
+import com.example.garden.dto.RegistrationDto;
 import com.example.garden.model.ExpenseSummary;
 import com.example.garden.service.RegistrationService;
 import org.springframework.web.bind.annotation.*;
@@ -18,23 +18,24 @@ public class RegistrationController {
     }
 
     @PostMapping("/addRegistration")
-    public Registration addRegistration(@RequestBody Registration registration) {
-        return registrationService.createRegistration(registration);
+    public RegistrationDto addRegistration(@RequestBody RegistrationDto registrationDto) {
+        return registrationService.createRegistration(registrationDto);
     }
 
     @PostMapping("/updateRegistration")
-    public Registration updateRegistration(@RequestBody Registration registration) {
-        return registrationService.updateRegistration(registration);
+    public RegistrationDto updateRegistration(@RequestBody RegistrationDto registrationDto) {
+        return registrationService.updateRegistration(registrationDto);
     }
 
     @GetMapping("/getRegistrationById/{id}")
-    public Registration getRegistration(@PathVariable Integer id) {
+    public RegistrationDto getRegistrationById(@PathVariable Integer id) {
         return registrationService.getRegistrationById(id);
     }
 
     @GetMapping("/getAllRegistrations")
-    public Iterable<Registration> getAllRegistrations() {
-        return registrationService.getAllRegistrations();
+    public Iterable<RegistrationDto> getAllRegistrations() {
+        List<RegistrationDto> list= registrationService.getAllRegistrations();
+        return list;
     }
 
     @DeleteMapping("/deleteRegistration/{id}")
@@ -43,22 +44,22 @@ public class RegistrationController {
     }
 
     @GetMapping("/findRegistrationsByDate/{date}")
-    public List<Registration> findRegistrationsByDate(@PathVariable("date") String date) {
+    public List<RegistrationDto> findRegistrationsByDate(@PathVariable("date") String date) {
         return registrationService.findRegistrationsByDate(date);
     }
 
     @GetMapping("/findRegistrationsByWeek/{year}/{week}")
-    public List<Registration> findRegistrationsByWeek(@PathVariable("year") Integer year, @PathVariable("week") Integer week) {
+    public List<RegistrationDto> findRegistrationsByWeek(@PathVariable("year") Integer year, @PathVariable("week") Integer week) {
         return registrationService.findRegistrationsByWeek(year, week);
     }
 
     @GetMapping("/findRegistrationsByMonth/{year}/{month}")
-    public List<Registration> findRegistrationsByMonth(@PathVariable("year") Integer year, @PathVariable("month") Integer month) {
+    public List<RegistrationDto> findRegistrationsByMonth(@PathVariable("year") Integer year, @PathVariable("month") Integer month) {
         return registrationService.findRegistrationsByMonth(year, month);
     }
 
     @GetMapping("/findRegistrationsByYear/{year}")
-    public List<Registration> findRegistrationsByYear(@PathVariable("year") Integer year) {
+    public List<RegistrationDto> findRegistrationsByYear(@PathVariable("year") Integer year) {
         return registrationService.findRegistrationsByYear(year);
     }
 

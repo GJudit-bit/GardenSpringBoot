@@ -1,5 +1,8 @@
 package com.example.garden.controller;
 
+import com.example.garden.dto.CategoryDto;
+import com.example.garden.dto.ItemDto;
+import com.example.garden.dto.UnitOfQuantityDto;
 import com.example.garden.model.Category;
 import com.example.garden.model.Item;
 import com.example.garden.model.UnitOfQuantity;
@@ -7,8 +10,8 @@ import com.example.garden.service.CategoryService;
 import com.example.garden.service.ItemService;
 import com.example.garden.service.UnitOfQuantityService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -35,114 +37,94 @@ public class ItemControllerTest {
     private final ItemService itemService;
     private final CategoryService categoryService;
     private final UnitOfQuantityService unitOfQuantityService;
+    private ItemDto savedItemDto;
 
 
     @Autowired
     public ItemControllerTest(MockMvc mockMvc, ItemService itemService, CategoryService categoryService, UnitOfQuantityService unitOfQuantityService) {
-
-        this.mockMvc = mockMvc;
+       this.mockMvc = mockMvc;
         this.categoryService = categoryService;
         this.unitOfQuantityService = unitOfQuantityService;
         this.objectMapper = new ObjectMapper();
         this.itemService = itemService;
     }
 
+    @BeforeEach
+    public void init() {
+        CategoryDto categoryDto = new CategoryDto(null, "Vegetables");
+        CategoryDto savedCategoryDto = categoryService.createCategory(categoryDto);
+        UnitOfQuantityDto unitOfQuantityDto = new UnitOfQuantityDto(null, "Pieces");
+        UnitOfQuantityDto savedUnitOfQuantityDto=unitOfQuantityService.createUnitOfQuantity(unitOfQuantityDto);
+        savedItemDto = itemService.createItem(new ItemDto(null,"Tomato", savedCategoryDto, savedUnitOfQuantityDto));
+
+    }
+
 
     @Test
     public void testThatCreateItemSuccessfullyReturnsSavedItem() throws Exception {
-        Item item = new Item("alma");
+        CategoryDto categoryDto = new CategoryDto(null, "Fruits");
+        CategoryDto savedCategoryDto = categoryService.createCategory(categoryDto);
+        UnitOfQuantityDto unitOfQuantityDto = new UnitOfQuantityDto(null, "kilogramm");
+        UnitOfQuantityDto savedUnitOfQuantityDto=unitOfQuantityService.createUnitOfQuantity(unitOfQuantityDto);
 
-        String itemJson = objectMapper.writeValueAsString(item);
+        ItemDto itemDto = itemService.createItem(new ItemDto(null,"alma", savedCategoryDto, savedUnitOfQuantityDto));
+
+        String itemJson = objectMapper.writeValueAsString(itemDto);
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/garden/addItem")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(itemJson)
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("alma")
-        );
+        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("alma"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.categoryDto.name").value("Fruits"));
     }
 
     @Test
-    public void testThatCreateItemWithCategoryAndUnitOfQuantitySuccessfullyReturnsSavedItem() throws Exception {
-        UnitOfQuantity unitOfQuantity = new UnitOfQuantity("kg");
-        Category category = new Category("zöldség");
-        Item item = new Item("répa");
-        item.addCategory(category);
-        item.setUnitOfQuantity(unitOfQuantity);
-
-        String itemJson = objectMapper.writeValueAsString(item);
-        System.out.println("Item:"+itemJson);
-
-        mockMvc.perform(
-                MockMvcRequestBuilders.post("/garden/addItem")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(itemJson)
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("répa")
-        );
-        }
-
-
-    @Test
     public void testThatUpdateItemSuccessfullyReturnsUpdatedItem() throws Exception {
-        Item item = new Item("alma");
-        Item savedItem = itemService.createItem(item);
-        savedItem.setName("repa");
-        String itemJson = objectMapper.writeValueAsString(savedItem);
+        ItemDto itemDto= new ItemDto(savedItemDto.id(),"alma",savedItemDto.categoryDto(),savedItemDto.unitOfQuantityDto());
+        String itemJson = objectMapper.writeValueAsString(itemDto);
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/garden/updateItem")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(itemJson)
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("repa"));
-    }
-
-
-    @Test
-    public void testThatFindItemByIdSuccessfullyReturnsItem() throws Exception {
-        Item item = new Item("alma");
-        Item savedItem = itemService.createItem(item);
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/garden/findItemById/" + savedItem.getId())
         ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("alma"));
     }
 
 
     @Test
+    public void testThatFindItemByIdSuccessfullyReturnsItem() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/garden/findItemById/" + savedItemDto.id())
+        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Tomato"));
+    }
+
+
+    @Test
     public void testThatFindAllItemsSuccessfullyReturnsListOfItems() {
-        Item item1 = new Item("alma");
-        Item item2 = new Item("répa");
-        itemService.createItem(item1);
-        itemService.createItem(item2);
+        ItemDto item = new ItemDto(null,"répa",null,null);
+        itemService.createItem(item);
 
         assert itemService.getAllItems(Sort.by("name")).size() == 2;
     }
 
     @Test
     public void testThatDeleteItemSuccessfullyDeletesItem() throws Exception {
-        Item item = new Item("alma");
-        Item savedItem = itemService.createItem(item);
-
         mockMvc.perform(
-                MockMvcRequestBuilders.delete("/garden/deleteItem/" + savedItem.getId())
+                MockMvcRequestBuilders.delete("/garden/deleteItem/" + savedItemDto.id())
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(content().string(""));
     }
 
     @Test
     public void testThatDeleteItemNotDeleteCategoryAndUnitOfQuantity() throws Exception {
-        UnitOfQuantity unitOfQuantity = new UnitOfQuantity("kg");
-        Category category = new Category("zöldség");
-        Item item = new Item("répa");
-        item.addCategory(category);
-        item.setUnitOfQuantity(unitOfQuantity);
-        Item savedItem = itemService.createItem(item);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.delete("/garden/deleteItem/" + savedItem.getId())
+                MockMvcRequestBuilders.delete("/garden/deleteItem/" + savedItemDto.id())
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(content().string(""));
 
 
-        assertNotNull(categoryService.getCategoryById(category.getId()));
-        assertNotNull(unitOfQuantityService.findById(unitOfQuantity.getId()));
+        assertNotNull(categoryService.findById(savedItemDto.categoryDto().id()));
+        assertNotNull(unitOfQuantityService.findById(savedItemDto.unitOfQuantityDto().id()));
     }
 
 
@@ -156,5 +138,5 @@ public class ItemControllerTest {
         ).andExpect(MockMvcResultMatchers.status().is5xxServerError());
     }
 
-    //test that delete item not works when item has categories or unit of quantity or registration
+
 }

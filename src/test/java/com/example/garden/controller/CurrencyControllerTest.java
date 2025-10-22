@@ -1,8 +1,10 @@
 package com.example.garden.controller;
 
-import com.example.garden.model.Currency;
+import com.example.garden.dto.CurrencyDto;
 import com.example.garden.service.CurrencyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,49 +19,52 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 @WithMockUser(username = "testuser", roles = {"USER_ROLE"})
-public class CurrencyTest {
+public class CurrencyControllerTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
     private final CurrencyService currencyService;
+    private static CurrencyDto savedCurrencyDto;
 
     @Autowired
-    public CurrencyTest(MockMvc mockMvc, ObjectMapper objectMapper, CurrencyService currencyService) {
+    public CurrencyControllerTest(MockMvc mockMvc, ObjectMapper objectMapper, CurrencyService currencyService) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
         this.currencyService = currencyService;
     }
 
+    @BeforeEach
+    public void init() {
+        CurrencyDto currencyDto = new CurrencyDto(null,"USD");
+        savedCurrencyDto=currencyService.createCurrency(currencyDto);
+    }
+
     @Test
     public void addCurrency() throws Exception {
-        Currency currency = new Currency("USD");
+        CurrencyDto currencyDto = new CurrencyDto(null,"HUF");
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/garden/addCurrency")
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(currency))
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("USD"))
+                        .content(objectMapper.writeValueAsString(currencyDto))
+        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("HUF"))
           .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     public void updateCurrency() throws Exception {
-        Currency currency = new Currency("EUR");
-        Currency savedCurrency=currencyService.createCurrency(currency);
-        savedCurrency.setName("HUF");
+        CurrencyDto currencyDto=new CurrencyDto(savedCurrencyDto.id(),"HUF");
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/garden/updateCurrency")
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(savedCurrency))
+                        .content(objectMapper.writeValueAsString(currencyDto))
         ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("HUF"))
           .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     public void deleteCurrency() throws Exception {
-        Currency currency = new Currency("GBP");
-        Currency savedCurrency = currencyService.createCurrency(currency);
         mockMvc.perform(
-                MockMvcRequestBuilders.delete("/garden/deleteCurrency/" + savedCurrency.getId())
+                MockMvcRequestBuilders.delete("/garden/deleteCurrency/" + savedCurrencyDto.id())
         ).andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -74,26 +79,21 @@ public class CurrencyTest {
 
     @Test
     public void findCurrencyById() throws Exception {
-        Currency currency = new Currency("JPY");
-        Currency savedCurrency = currencyService.createCurrency(currency);
         mockMvc.perform(
-                MockMvcRequestBuilders.get("/garden/findCurrencyById/" + savedCurrency.getId())
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("JPY"))
+                MockMvcRequestBuilders.get("/garden/findCurrencyById/" + savedCurrencyDto.id())
+        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("USD"))
           .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     public void findAllCurrencies() throws Exception {
-        Currency currency = new Currency("JPY");
-        Currency savedCurrency = currencyService.createCurrency(currency);
-
-        Currency currency2 = new Currency("HUF");
-        Currency savedCurrency2 = currencyService.createCurrency(currency2);
+        CurrencyDto currencyDto2 = new CurrencyDto(null,"JPY");
+        CurrencyDto savedCurrencyDto2=currencyService.createCurrency(currencyDto2);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/garden/findAllCurrencies")
-        ).andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("HUF"))
-          .andExpect(MockMvcResultMatchers.jsonPath("$[1].name").value("JPY"))
+        ).andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("JPY"))
+          .andExpect(MockMvcResultMatchers.jsonPath("$[1].name").value("USD"))
           .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

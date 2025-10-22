@@ -1,12 +1,15 @@
 package com.example.garden.controller;
 
-import com.example.garden.model.Category;
-import com.example.garden.model.Item;
+import com.example.garden.dto.CategoryDto;
+import com.example.garden.dto.ItemDto;
+import com.example.garden.dto.UnitOfQuantityDto;
 import com.example.garden.service.CategoryService;
 import com.example.garden.service.ItemService;
+import com.example.garden.service.UnitOfQuantityService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,56 +36,44 @@ public class CategoryControllerTest {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
     private final ItemService itemService;
+    private final UnitOfQuantityService unitOfQuantityService;
     private final CategoryService categoryService;
+    private static CategoryDto savedCategoryDto = null;
 
 
 
     @Autowired
-    public CategoryControllerTest(MockMvc mockMvc, ObjectMapper objectMapper, ItemService itemService, CategoryService categoryService) {
+    public CategoryControllerTest(MockMvc mockMvc, ObjectMapper objectMapper, ItemService itemService, UnitOfQuantityService unitOfQuantityService, CategoryService categoryService) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
         this.itemService = itemService;
+        this.unitOfQuantityService = unitOfQuantityService;
         this.categoryService = categoryService;
     }
 
+    @BeforeEach
+    public void init() {
+        CategoryDto categoryDto = new CategoryDto(null, "Vegetables");
+        savedCategoryDto = categoryService.createCategory(categoryDto);
+    }
 
     @Test
     public void testThatCreateCategorySuccessfullyReturnsSavedCategory() throws Exception {
-        Category category = new Category("Vegetables");
-        String categoryJson = objectMapper.writeValueAsString(category);
+       CategoryDto categoryDto2 = new CategoryDto(null, "Fruits");
+       String categoryJson = objectMapper.writeValueAsString(categoryDto2);
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/garden/addCategory")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(categoryJson)
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Vegetables"));
+        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Fruits"));
 
     }
 
-    @Test
-    public void testThatCreateCategoryWithItemsSuccessfullyReturnsSavedCategory() throws Exception {
-        Category category = new Category("Vegetables");
-        Item item1= new Item("Carrot");
-        Item item2= new Item("Potato");
-        category.addItem(item1);
-        category.addItem(item2);
-
-        String categoryJson = objectMapper.writeValueAsString(category);
-        String jsonInString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(category);
-
-        mockMvc.perform(
-                MockMvcRequestBuilders.post("/garden/addCategory")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(categoryJson)
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Vegetables"));
-
-    }
 
     @Test
     public void testThatUpdateCategorySuccessfullyReturnsUpdatedCategory() throws Exception {
-        Category category = new Category("Fruits");
-        Category savedCategory = categoryService.createCategory(category);
-        savedCategory.setName("Citrus Fruits");
-        String categoryJson = objectMapper.writeValueAsString(savedCategory);
+        CategoryDto categoryDto2 = new CategoryDto(savedCategoryDto.id(),"Citrus Fruits");
+        String categoryJson = objectMapper.writeValueAsString(categoryDto2);
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/garden/updateCategory")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -92,88 +83,82 @@ public class CategoryControllerTest {
 
     @Test
     public void testThatFindCategoryByIdSuccessfullyReturnsCategory() throws Exception {
-        Category category = new Category("Grains");
-        Category savedCategory = categoryService.createCategory(category);
-
         mockMvc.perform(
-                MockMvcRequestBuilders.get("/garden/findCategoryById/" + savedCategory.getId())
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Grains"));
+                MockMvcRequestBuilders.get("/garden/findCategoryById/" + savedCategoryDto.id())
+        ).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Vegetables"));
     }
 
 
     @Test
     public void testThatFindAllCategoriesSuccessfullyReturnsListOfCategories() throws Exception {
-        Category category1 = new Category("Dairy");
-        Category category2 = new Category("Meat");
+        CategoryDto category1 = new CategoryDto(null,"Dairy");
         categoryService.createCategory(category1);
-        categoryService.createCategory(category2);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/garden/findAllCategory")
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("Dairy"))
-         .andExpect(MockMvcResultMatchers.jsonPath("$[1].name").value("Meat"));
+         .andExpect(MockMvcResultMatchers.jsonPath("$[1].name").value("Vegetables"));
     }
 
     @Test
     public void testThatDeleteCategorySuccessfullyDeletesCategory() throws Exception {
-        Category category = new Category("Beverages");
-        Category savedCategory = categoryService.createCategory(category);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.delete("/garden/deleteCategory/" + savedCategory.getId())
-
+                MockMvcRequestBuilders.delete("/garden/deleteCategory/" + savedCategoryDto.id())
         ).andExpect(status().isOk());
 
         // Verify that the category is deleted
         Exception exception = assertThrows(EntityNotFoundException.class, () -> {
-            categoryService.getCategoryById(savedCategory.getId());
+            categoryService.findById(savedCategoryDto.id());
         });
 
-        assertTrue(exception.getMessage().contains("Category with id " + savedCategory.getId() + " does not exist."));
+        assertTrue(exception.getMessage().contains("Category with id " + savedCategoryDto.id() + " does not exist."));
 
     }
 
     @Test
     public void testThatAddItemToCategorySuccessfullyAddsItem() throws Exception {
-        Item item = itemService.createItem(new Item("Chips"));
-        Category category = categoryService.createCategory(new Category("Snacks"));
+        UnitOfQuantityDto unitOfQuantityDto = new UnitOfQuantityDto(null, "Pieces");
+        UnitOfQuantityDto savedUnitOfQuantityDto=unitOfQuantityService.createUnitOfQuantity(unitOfQuantityDto);
+        ItemDto item = itemService.createItem(new ItemDto(null,"Chips", savedCategoryDto, savedUnitOfQuantityDto));
 
-        categoryService.addItemToCategory(category.getId(), item.getId());
-
+        categoryService.addItemToCategory(savedCategoryDto.id(), item.id());
         mockMvc.perform(
-                MockMvcRequestBuilders.post("/garden/addItemToCategory/" + category.getId().toString() + "/" + item.getId().toString())
+                MockMvcRequestBuilders.post("/garden/addItemToCategory/" + savedCategoryDto.id() + "/" + item.id())
                         .contentType(MediaType.APPLICATION_JSON)
 
         ).andExpect(status().isOk());
 
 
        MvcResult resultItem = mockMvc.perform(
-                MockMvcRequestBuilders.get("/garden/findItemById/" + item.getId())
+                MockMvcRequestBuilders.get("/garden/findItemById/" + item.id())
         ).andDo(print()).andReturn();
         String contentItem = resultItem.getResponse().getContentAsString();
-        Assertions.assertThat(contentItem).contains("\"category\":{\"id\":1,\"name\":\"Snacks\"}");
+        Assertions.assertThat(contentItem).contains("\"categoryDto\":{\"id\":1,\"name\":\"Vegetables\"}");
     }
 
     @Test
     public void testThatRemoveItemFromCategorySuccessfullyRemovesItem() throws Exception {
         // First, add the item to the category
-       Integer categoryId = categoryService.createCategory(new Category("Desserts")).getId();
-       Integer itemId = itemService.createItem(new Item("Cake")).getId();
-       categoryService.addItemToCategory(categoryId, itemId);
+        UnitOfQuantityDto unitOfQuantityDto = new UnitOfQuantityDto(null, "Pieces");
+        UnitOfQuantityDto savedUnitOfQuantityDto=unitOfQuantityService.createUnitOfQuantity(unitOfQuantityDto);
+        ItemDto item = itemService.createItem(new ItemDto(null,"Chips", savedCategoryDto, savedUnitOfQuantityDto));
 
-       Item savedItem=itemService.getItemById(itemId);
-       assertTrue(savedItem.getCategory() != null && savedItem.getCategory().getId().equals(categoryId));
+        categoryService.addItemToCategory(savedCategoryDto.id(), item.id());
+
+       ItemDto savedItem=itemService.findById(item.id());
+       assertTrue(savedItem.categoryDto() != null && savedItem.categoryDto().id().equals(savedCategoryDto.id()));
 
 
         mockMvc.perform(
-                MockMvcRequestBuilders.post("/garden/removeItemFromCategory/" + categoryId.toString() + "/" + itemId.toString())
+                MockMvcRequestBuilders.post("/garden/removeItemFromCategory/" + savedCategoryDto.id().toString() + "/" + savedItem.id().toString())
                         .contentType(MediaType.APPLICATION_JSON)
 
         ).andExpect(status().isOk());
 
-        Item savedItemAfter=itemService.getItemById(itemId);
-        assertNull(savedItemAfter.getCategory());
+        ItemDto savedItemAfter=itemService.findById(savedItem.id());
+        assertNull(savedItemAfter.categoryDto());
     }
 
     @Test
@@ -197,9 +182,12 @@ public class CategoryControllerTest {
     @Test
     public void testThatAddItemToCategoryThrowsExceptionWhenCategoryDoesNotExist() throws Exception {
         String nonExistentCategoryId = "9990";
-        Integer itemId = itemService.createItem(new Item("Soda")).getId();
-            mockMvc.perform(
-                    MockMvcRequestBuilders.post("/garden/addItemToCategory/" + nonExistentCategoryId + "/" + itemId.toString())
+        UnitOfQuantityDto unitOfQuantityDto = new UnitOfQuantityDto(null, "Pieces");
+        UnitOfQuantityDto savedUnitOfQuantityDto=unitOfQuantityService.createUnitOfQuantity(unitOfQuantityDto);
+        ItemDto item = itemService.createItem(new ItemDto(null,"Chips", null, savedUnitOfQuantityDto));
+
+        mockMvc.perform(
+                    MockMvcRequestBuilders.post("/garden/addItemToCategory/" + nonExistentCategoryId + "/" + item.id().toString())
                             .contentType(MediaType.APPLICATION_JSON)
             ).andExpect(status().is5xxServerError())
              .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Category not found"));
@@ -207,12 +195,13 @@ public class CategoryControllerTest {
 
     @Test
     public void testThatRemoveItemFromCategoryThrowsExceptionWhenCategoryDoesNotExist() throws Exception {
-        String nonExistentCategoryId = "9990";
-        Integer itemId = itemService.createItem(new Item("Juice")).getId();
+        String nonExistentCategoryDtoId = "9990";
+        UnitOfQuantityDto unitOfQuantityDto = new UnitOfQuantityDto(null, "Pieces");
+        UnitOfQuantityDto savedUnitOfQuantityDto=unitOfQuantityService.createUnitOfQuantity(unitOfQuantityDto);
+        ItemDto item = itemService.createItem(new ItemDto(null,"Chips", null, savedUnitOfQuantityDto));
 
-
-            mockMvc.perform(
-                    MockMvcRequestBuilders.post("/garden/removeItemFromCategory/" + nonExistentCategoryId + "/" + itemId.toString())
+        mockMvc.perform(
+                    MockMvcRequestBuilders.post("/garden/removeItemFromCategory/" + nonExistentCategoryDtoId + "/" + item.id().toString())
                             .contentType(MediaType.APPLICATION_JSON)
             ).andExpect(status().is5xxServerError())
              .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Category not found."));;
@@ -221,14 +210,10 @@ public class CategoryControllerTest {
 
     @Test
     public void testThatRemoveItemFromCategoryThrowsExceptionWhenItemDoesNotExist() throws Exception {
-        Category category = new Category("Beverages");
-        Category savedCategory = categoryService.createCategory(category);
-
-        String nonExistentItemId = "9990";
-
+           String nonExistentItemId = "9990";
 
             mockMvc.perform(
-                    MockMvcRequestBuilders.post("/garden/removeItemFromCategory/" + savedCategory.getId().toString() + "/" + nonExistentItemId)
+                    MockMvcRequestBuilders.post("/garden/removeItemFromCategory/" + savedCategoryDto.id().toString() + "/" + nonExistentItemId)
                             .contentType(MediaType.APPLICATION_JSON)
             ).andExpect(status().is5xxServerError())
              .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Item not found"));
@@ -236,10 +221,7 @@ public class CategoryControllerTest {
 
     @Test
     public void testThatCreateCategoryThrowsExceptionWhenCategoryNameNotUnique() throws Exception {
-        Category category = new Category("Dairy");
-        categoryService.createCategory(category);
-
-        Category categoryWithSameName = new Category("Dairy");
+        CategoryDto categoryWithSameName = new CategoryDto(null,"Vegetables");
 
         Exception exception = assertThrows(DataIntegrityViolationException.class, () -> {
             categoryService.createCategory(categoryWithSameName);;

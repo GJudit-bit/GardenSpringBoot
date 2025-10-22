@@ -1,6 +1,6 @@
 package com.example.garden.controller;
 
-import com.example.garden.model.UnitOfQuantity;
+import com.example.garden.dto.UnitOfQuantityDto;
 import com.example.garden.service.UnitOfQuantityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,15 +19,14 @@ public class UnitOfQuantityController {
     }
 
     @PostMapping("/addUnitOfQuantity")
-    public UnitOfQuantity create(@RequestBody UnitOfQuantity unitOfQuantity){
-        return unitOfQuantityService.createUnitOfQuantity(unitOfQuantity);
+    public UnitOfQuantityDto create(@RequestBody UnitOfQuantityDto unitOfQuantityDto){
+        return unitOfQuantityService.createUnitOfQuantity(unitOfQuantityDto);
     }
 
 
     @PostMapping("/updateUnitOfQuantity")
-    public UnitOfQuantity update(@RequestBody UnitOfQuantity unitOfQuantity) {
-        return unitOfQuantityService.updateUnitOfQuantity(unitOfQuantity);
-
+    public UnitOfQuantityDto update(@RequestBody UnitOfQuantityDto unitOfQuantityDto) {
+        return unitOfQuantityService.updateUnitOfQuantity(unitOfQuantityDto);
     }
 
     @DeleteMapping("/deleteUnitOfQuantity/{id}")
@@ -36,13 +35,12 @@ public class UnitOfQuantityController {
     }
 
     @GetMapping("/findUnitOfQuantityById/{id}")
-    public UnitOfQuantity findById(@PathVariable Integer id) {
+    public UnitOfQuantityDto findById(@PathVariable Integer id) {
         return unitOfQuantityService.findById(id);
     }
 
     @GetMapping("/findAllUnitOfQuantities")
-    public List<UnitOfQuantity> findAll() {
+    public List<UnitOfQuantityDto> findAll() {
         return unitOfQuantityService.findAll();
     }
-
 }

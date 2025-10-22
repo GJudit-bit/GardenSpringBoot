@@ -1,7 +1,7 @@
 package com.example.garden.controller;
 
 
-import com.example.garden.model.Currency;
+import com.example.garden.dto.CurrencyDto;
 import com.example.garden.service.CurrencyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -24,13 +24,13 @@ public class    CurrencyController {
 
     @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("/addCurrency")
-    public Currency addCurrency(@RequestBody Currency currency) {
-       return currencyService.createCurrency(currency);
+    public CurrencyDto create(@RequestBody CurrencyDto currencyDto) {
+       return currencyService.createCurrency(currencyDto);
     }
 
     @PostMapping("/updateCurrency")
-    public Currency updateCurrency(@RequestBody Currency currency) {
-        return currencyService.updateCurrency(currency);
+    public CurrencyDto updateCurrency(@RequestBody CurrencyDto currencyDto) {
+        return currencyService.updateCurrency(currencyDto);
     }
 
     @DeleteMapping("/deleteCurrency/{id}")
@@ -38,13 +38,13 @@ public class    CurrencyController {
         currencyService.deleteCurrency(id);
     }
     @GetMapping("/findCurrencyById/{id}")
-    public Currency findCurrencyById(@PathVariable Integer id) {
-        return currencyService.getCurrencyById(id);
+    public CurrencyDto findById(@PathVariable Integer id) {
+        return currencyService.findById(id);
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/findAllCurrencies")
-    public Iterable<Currency> findAllCurrencies() {
+    public Iterable<CurrencyDto> findAllCurrencies() {
         return currencyService.getAllCurrencies(Sort.by("name"));
     }
 

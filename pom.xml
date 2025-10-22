@@ -77,6 +77,12 @@
 		<groupId>com.h2database</groupId>
 		<artifactId>h2</artifactId>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.modelmapper/modelmapper-module-record -->
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper-module-record</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 
 		<!--jwt-->
 		<dependency>

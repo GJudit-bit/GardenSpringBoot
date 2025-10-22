@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
 @EnableMethodSecurity
-@EnableJpaAuditing // Ezt a sort kell hozzáadnod, hogy a createdby és createdDate mezők automatikusan kitöltődjenek
+@EnableJpaAuditing
 public class GardenApplication {
 
 	public static void main(String[] args) {

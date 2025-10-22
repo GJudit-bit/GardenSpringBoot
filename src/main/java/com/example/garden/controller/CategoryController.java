@@ -1,6 +1,6 @@
 package com.example.garden.controller;
 
-import com.example.garden.model.Category;
+import com.example.garden.dto.CategoryDto;
 import com.example.garden.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -20,14 +20,13 @@ public class CategoryController {
     }
 
     @PostMapping("/addCategory")
-    public Category create(@RequestBody Category category){
-        return categoryService.createCategory(category);
+    public CategoryDto create(@RequestBody CategoryDto categoryDto) {
+        return categoryService.createCategory(categoryDto);
     }
 
     @PostMapping("/updateCategory")
-    public Category update(@RequestBody Category category) {
-        return categoryService.updateCategory(category);
-
+    public CategoryDto update(@RequestBody CategoryDto categoryDto) {
+        return categoryService.updateCategory(categoryDto);
     }
 
     @DeleteMapping("/deleteCategory/{id}")
@@ -36,13 +35,12 @@ public class CategoryController {
     }
 
     @GetMapping("/findCategoryById/{id}")
-    public Category findById(@PathVariable Integer id) {
-        return categoryService.getCategoryById(id);
+    public CategoryDto findById(@PathVariable Integer id) {
+        return categoryService.findById(id);
     }
 
     @GetMapping("/findAllCategory")
-    public List<Category> findAll() {
-
+    public List<CategoryDto> findAll() {
         return categoryService.getAllCategories(Sort.by("name"));
     }
 
@@ -50,8 +48,9 @@ public class CategoryController {
     public void addItemToCategory(@PathVariable Integer categoryId, @PathVariable Integer itemId) {
         categoryService.addItemToCategory(categoryId, itemId);
     }
+
     @PostMapping("/removeItemFromCategory/{categoryId}/{itemId}")
-     public void removeItemFromCategory(@PathVariable Integer categoryId, @PathVariable Integer itemId) {
+    public void removeItemFromCategory(@PathVariable Integer categoryId, @PathVariable Integer itemId) {
         categoryService.removeItemFromCategory(categoryId, itemId);
     }
 

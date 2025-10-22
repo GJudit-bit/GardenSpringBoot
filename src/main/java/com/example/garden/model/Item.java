@@ -14,17 +14,17 @@ public class Item implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(unique=true, nullable=false)
+    @Column(unique = true, nullable = false)
     private String name;
 
     //owner of the relationship
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "category_id", nullable = true)
     @Fetch(value = FetchMode.JOIN)
-  //  @JsonManagedReference
+    //  @JsonManagedReference
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "unit_of_quantity_id", nullable = true)
     @Fetch(value = FetchMode.JOIN)
     private UnitOfQuantity unitOfQuantity;
@@ -52,6 +52,9 @@ public class Item implements Serializable {
         return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

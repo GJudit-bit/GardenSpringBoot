@@ -1,6 +1,6 @@
 package com.example.garden.controller;
 
-import com.example.garden.model.Item;
+import com.example.garden.dto.ItemDto;
 import com.example.garden.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -21,36 +21,36 @@ public class ItemController {
         this.itemService = itemService;
     }
 
-        @PostMapping("/addItem")
-        public Item create(@RequestBody Item item){
-        return itemService.createItem(item);
+    @PostMapping("/addItem")
+    public ItemDto create(@RequestBody ItemDto itemDto) {
+        return itemService.createItem(itemDto);
     }
 
 
-        @PostMapping("/updateItem")
-        public Item update(@RequestBody Item item) {
-        return itemService.updateItem(item);
-
+    @PostMapping("/updateItem")
+    public ItemDto update(@RequestBody ItemDto itemDto) {
+        return itemService.updateItem(itemDto);
     }
 
-        @DeleteMapping("/deleteItem/{id}")
-        public void delete(@PathVariable Integer id) {
-            itemService.deleteItem(id);
+    @DeleteMapping("/deleteItem/{id}")
+    public void delete(@PathVariable Integer id) {
+        itemService.deleteItem(id);
     }
 
-        @GetMapping("/findItemById/{id}")
-        public Item findById(@PathVariable Integer id) {
-        return itemService.getItemById(id);
+    @GetMapping("/findItemById/{id}")
+    public ItemDto findById(@PathVariable Integer id) {
+        return itemService.findById(id);
     }
 
-        @GetMapping("/findAllItem")
-        public List<Item> findAll() {
+    @GetMapping("/findAllItem")
+    public List<ItemDto> findAll() {
         return itemService.getAllItems(Sort.by("name"));
     }
 
+
     @GetMapping("/findItemsByUnitOfQuantityId/{id}")
-    public List<Item> findByItemId(@PathVariable Integer itemId) {
+    public List<ItemDto> findByItemId(@PathVariable Integer itemId) {
         return itemService.getItemsByUnitOfQuantity(itemId);
     }
-    }
+}
 

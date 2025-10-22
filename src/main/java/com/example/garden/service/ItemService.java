@@ -1,6 +1,8 @@
 package com.example.garden.service;
 
 
+import com.example.garden.dto.ItemDto;
+import com.example.garden.mapper.ItemMapper;
 import com.example.garden.model.Item;
 import com.example.garden.repository.ItemRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,44 +16,47 @@ import java.util.List;
 public class ItemService {
 
     private final ItemRepository itemRepository;
+    private final ItemMapper itemMapper;
 
     @Autowired
-    public ItemService(ItemRepository itemRepository) {
+    public ItemService(ItemRepository itemRepository, ItemMapper itemMapper) {
         this.itemRepository = itemRepository;
+        this.itemMapper = itemMapper;
     }
 
-    public Item createItem(Item item) {
-        return itemRepository.save(item);
+    public ItemDto createItem(ItemDto itemDto) {
+        Item item=itemMapper.toEntity(itemDto);
+        Item savedItem= itemRepository.save(item);
+        return itemMapper.toItemDto(savedItem);
     }
 
 
-    public Item getItemById(Integer id) {
-       return itemRepository.findById(id).orElse(null);
+    public ItemDto findById(Integer id) {
+        Item item = itemRepository.findById(id).orElseThrow( () -> new EntityNotFoundException("Item with id " + id + " does not exist."));
+        return itemMapper.toItemDto(item);
     }
 
-    public Item updateItem(Item item) {
-        return itemRepository.save(item);
+    public ItemDto updateItem(ItemDto itemDto) {
+        Item item=itemMapper.toEntity(itemDto);
+        Item savedItem= itemRepository.save(item);
+        return itemMapper.toItemDto(savedItem);
     }
 
     public void deleteItem(Integer id) {
         Item item = itemRepository.findById(id).orElseThrow( () -> new EntityNotFoundException("Item with id " + id + " does not exist."));
-
         itemRepository.deleteById(item.getId());
     }
 
-    public List<Item> getAllItems(Sort sort) {
-        return itemRepository.findAll();
+    public List<ItemDto> getAllItems(Sort sort) {
+        return itemRepository.findAll().stream().map(itemMapper::toItemDto).toList();
     }
 
 
-    public List<Item> getItemsByUnitOfQuantity(Integer id) {
-        return itemRepository.findByUnitOfQuantity_Id(id);
+    public List<ItemDto> getItemsByUnitOfQuantity(Integer id) {
+        return itemRepository.findByUnitOfQuantity_Id(id).stream().map(itemMapper::toItemDto).toList();
     }
 
-    public List<Item> getItemsByCategory(Integer id) {
-
-        return itemRepository.findByCategory_Id(id);
+    public List<ItemDto> getItemsByCategory(Integer id) {
+        return itemRepository.findByCategory_Id(id).stream().map(itemMapper::toItemDto).toList();
     }
-
-
 }
