@@ -16,15 +16,6 @@ public class RoleService {
         this.roleRepository = roleRepository;
     }
 
- /*   public void initializeRoles() {
-        if (roleRepository.findByName("ROLE_USER") == null) {
-            roleRepository.save(new Role("ROLE_USER"));
-        }
-        if (roleRepository.findByName("ROLE_ADMIN") == null) {
-            roleRepository.save(new Role("ROLE_ADMIN"));
-        }
-    }*/
-
     public Role createRole(Role role) {
         return roleRepository.save(role);
     }

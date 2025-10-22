@@ -19,7 +19,7 @@ public class Item implements Serializable {
 
     //owner of the relationship
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-    @JoinColumn(name = "category_id", nullable = true)
+    @JoinColumn(name = "category_id")
     @Fetch(value = FetchMode.JOIN)
     //  @JsonManagedReference
     private Category category;
