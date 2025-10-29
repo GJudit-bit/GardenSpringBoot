@@ -1,15 +1,13 @@
 package com.example.garden.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
-import java.io.Serializable;
 import java.util.List;
 
 @Entity
-public class Item implements Serializable {
+public class Item {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,20 +16,18 @@ public class Item implements Serializable {
     private String name;
 
     //owner of the relationship
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "category_id")
     @Fetch(value = FetchMode.JOIN)
-    //  @JsonManagedReference
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "unit_of_quantity_id", nullable = true)
     @Fetch(value = FetchMode.JOIN)
     private UnitOfQuantity unitOfQuantity;
 
-    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "item")
     @Fetch(value = FetchMode.JOIN)
-    @JsonBackReference
     private List<Registration> registration;
 
     public Item() {

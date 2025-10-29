@@ -33,6 +33,7 @@ public class    CurrencyController {
         return currencyService.updateCurrency(currencyDto);
     }
 
+    @CrossOrigin(origins = "http://localhost:4200")
     @DeleteMapping("/deleteCurrency/{id}")
     public void deleteCurrency(@PathVariable Integer id) {
         currencyService.deleteCurrency(id);

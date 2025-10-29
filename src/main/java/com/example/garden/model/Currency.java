@@ -1,15 +1,13 @@
 package com.example.garden.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import javax.validation.constraints.Size;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Currency implements Serializable {
+public class Currency {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -19,8 +17,7 @@ public class Currency implements Serializable {
     @Column(unique=true, nullable=false)
     private String name;
 
-    @OneToMany(mappedBy = "currency", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JsonBackReference
+    @OneToMany(mappedBy = "currency", cascade = CascadeType.MERGE)
     private List<Registration> registration= new ArrayList<>();
 
     public Currency() {

@@ -1,6 +1,5 @@
 package com.example.garden.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -9,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Category implements java.io.Serializable{
+public class Category {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -17,9 +16,8 @@ public class Category implements java.io.Serializable{
     @Column(unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
     @Fetch(value = FetchMode.JOIN)
-    @JsonBackReference
     private List<Item> items = new ArrayList<>();
 
 

@@ -38,14 +38,12 @@ public class ItemMapper {
         return new ItemDto(id, name, category==null?null:categoryMapper.toCategoryDto(category), unitOfQuantity==null?null:unitOfQuantityMapper.toUnitOfQuantityDto(unitOfQuantity));
     }
 
-    public static List<ItemDto> toItemDtoList(List<Item> items) {
+    public List<ItemDto> toItemDtoList(List<Item> items) {
         return items.stream().map(item -> {
             Integer id = item.getId();
             String name = item.getName();
             Category category = item.getCategory();
             UnitOfQuantity unitOfQuantity = item.getUnitOfQuantity();
-            CategoryMapper categoryMapper = new CategoryMapper();
-            UnitOfQuantityMapper unitOfQuantityMapper = new UnitOfQuantityMapper();
             return new ItemDto(id, name, category==null? null:categoryMapper.toCategoryDto(category), unitOfQuantity==null? null:unitOfQuantityMapper.toUnitOfQuantityDto(unitOfQuantity));
         }).toList();
     }

@@ -2,10 +2,9 @@ package com.example.garden.model;
 
 import jakarta.persistence.*;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
 
 @Entity
-public class UnitOfQuantity implements Serializable {
+public class UnitOfQuantity{
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
